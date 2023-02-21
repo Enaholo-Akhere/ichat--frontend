@@ -36,7 +36,6 @@ const Messaging = () => {
     'hello',
     'hello',
     'hello',
-    'hello',
   ];
   return (
     <Box>
