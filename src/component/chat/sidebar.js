@@ -11,7 +11,6 @@ import {
 } from '../../redux/features/userSlice';
 
 const Sidebar = () => {
-  // const rooms = ['first room', 'second room', 'third room'];
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const {
