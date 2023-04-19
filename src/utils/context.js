@@ -4,4 +4,4 @@ import { createContext } from 'react';
 const SOCKET_URL = 'http://localhost/5000';
 
 //app context
-export const AppContent = createContext({});
+export const AppContext = createContext();

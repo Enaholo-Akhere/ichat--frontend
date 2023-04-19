@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import TextField from '@mui/material/TextField';
@@ -9,17 +8,20 @@ import InputAdornment from '@mui/material/InputAdornment';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import LockIcon from '@mui/icons-material/Lock';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useContext } from 'react';
 import EmailIcon from '@mui/icons-material/Email';
 import { Link } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useLoginUserMutation } from '../../redux/services/appApi';
+import { LoadingButton } from '@mui/lab';
+import { AppContext } from '../../component/context/app-context';
 
 const Login = ({ setIsLoggedIn }) => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(true);
+  const { socket } = useContext(AppContext);
 
   const [loginUser, { error, isLoading, data }] = useLoginUserMutation();
 
@@ -48,19 +50,16 @@ const Login = ({ setIsLoggedIn }) => {
 
   const onSubmit = (value, { resetForm, setFieldError }) => {
     loginUser(value)
-      .then(({data, error}) => {
-        console.log(data, error);
-        if (error) {
-          toast.error(error.data);
-        }
-        if(data) {
+      .then(({ data }) => {
+        if (data) {
+          socket.emit('new-user');
           setIsLoggedIn(true);
           navigate('/chat');
           resetForm({ value: '' });
         }
       })
       .catch((err) => {
-        toast.error('error');
+        toast.error(error.data);
         console.log(err);
       });
   };
@@ -69,6 +68,12 @@ const Login = ({ setIsLoggedIn }) => {
     validationSchema,
     onSubmit,
   });
+
+  useEffect(() => {
+    if (error) {
+      toast.warning(error.data);
+    }
+  }, [error]);
   return (
     <Box sx={{ overflow: 'hidden' }}>
       <ToastContainer
@@ -204,13 +209,15 @@ const Login = ({ setIsLoggedIn }) => {
                 }}
               />
 
-              <Button
+              <LoadingButton
+                loading={isLoading}
+                fullWidth
                 type='submit'
                 variant='contained'
                 sx={{ mt: 2, textTransform: 'capitalize' }}
               >
                 Login
-              </Button>
+              </LoadingButton>
             </form>
 
             <Typography
