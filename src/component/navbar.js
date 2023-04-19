@@ -15,8 +15,6 @@ import { useSelector } from 'react-redux';
 
 const NavBar = ({ isLoggedIn }) => {
   const user = useSelector((state) => state.user);
-
-  console.log('user state', user);
   const navigate = useNavigate();
   const anchorRef = useRef(null);
   const [openPopover, setOpenPopover] = useState(false);

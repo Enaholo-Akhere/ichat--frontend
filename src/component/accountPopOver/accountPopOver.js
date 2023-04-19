@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import LogoutIcon from '@mui/icons-material/Logout';
 import {
   Avatar,
@@ -9,46 +10,34 @@ import {
   Popover,
   Typography,
 } from '@mui/material';
-//import { useNavigate } from 'react-router-dom';
-// import toast from 'react-hot-toast';
-//import { clearUserDetails } from 'src/redux/slices';
-// import { clearState } from 'src/services/storage';
 import { Cog as CogIcon } from '../../icons/cog';
 import { UserCircle as UserCircleIcon } from '../../icons/user-circle';
 import { useLogoutUserMutation } from '../../redux/services/appApi';
 import Link from '@mui/material/Link';
+import { useNavigate } from 'react-router-dom';
+import UtilityModal from '../../utils/utilityModal';
+import { BallTriangle } from 'react-loader-spinner';
 
 export const AccountPopover = (props) => {
-  const [logoutUser] = useLogoutUserMutation();
-
+  const navigate = useNavigate();
+  const [logoutUser, { isLoading, data, error }] = useLogoutUserMutation();
   const { anchorEl, onClose, open, onOpen, user, ...other } = props;
-  //const dispatch = useDispatch();
+  const [openModal, setOpenModal] = useState(false);
 
-  const handleLogout = async (e) => {
-    e.preventDefault();
+  const handleLogout = async () => {
     await logoutUser(user);
-
-    window.location.replace('/');
+    navigate('/');
   };
 
-  //const user = useSelector((state) => state.user);
-  // const navigate = useNavigate();
-  //console.log(user);
-
-  // const handleLogout = async () => {
-  //   try {
-  //     onClose?.();
-  //    // dispatch(clearUserDetails());
-  //     clearState()
-  //       .then(() => {
-  //         navigate('/login');
-  //       })
-  //       .catch((err) => console.log("couldn't log out"));
-  //   } catch (err) {
-  //     console.error(err);
-  //     alert('Unable to logout.');
-  //   }
-  // };
+  useEffect(() => {
+    if (isLoading) {
+      setOpenModal(true);
+    } else if (error === undefined || error) {
+      setOpenModal(false);
+    } else if (data) {
+      setOpenModal(false);
+    }
+  }, [isLoading, data, error]);
 
   return (
     <Popover
@@ -64,6 +53,34 @@ export const AccountPopover = (props) => {
       transitionDuration={0}
       {...other}
     >
+      <UtilityModal
+        open={openModal}
+        setOpen={setOpenModal}
+        name={'Modal'}
+        display='none'
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            color: 'white',
+            zIndex: 2,
+          }}
+        >
+          <BallTriangle
+            height={100}
+            width={100}
+            radius={5}
+            ariaLabel='ball-triangle-loading'
+            wrapperClass={{}}
+            wrapperStyle=''
+            color='#0a04a3'
+            visible={isLoading}
+          />
+        </Box>
+      </UtilityModal>
       <Box
         sx={{
           alignItems: 'center',
@@ -72,7 +89,6 @@ export const AccountPopover = (props) => {
         }}
       >
         <Avatar
-          // src={`https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}`}
           src={`https://ui-avatars.com/api/?name=${user.name.split(' ')[0]}+${
             user.name.split(' ')[1]
           }`}
@@ -88,7 +104,6 @@ export const AccountPopover = (props) => {
             ml: 1,
           }}
         >
-          {/* <Typography variant='body1'>{`${user?.firstName} ${user?.lastName}`}</Typography> */}
           <Typography variant='body1' sx={{ textTransform: 'capitalize' }}>{`${
             user.name.split(' ')[0]
           } ${user.name.split(' ')[1]}`}</Typography>
